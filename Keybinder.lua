@@ -15,14 +15,15 @@ function main()
         a = 65, b = 66, c = 67, d = 68, e=69, f=70, g=71, h=72, i=73, j=74, k=75, l=76, m=77, n=78, o=79, p=80, q=81, r=82, s=83, t=84, u = 85, v = 86, w = 87, x= 88, y=89, z=90     
     }
     repeat wait(100) until isSampAvailable()
-    sampAddChatMessage("Jerry's Key Binder - Zombie Survival 51.89.188.191:7777", 0x00BBFF)
-    sampAddChatMessage("CMD: /setbind [cmd] [key=a-z/0-9]", 0x0099EE)
+    showCommands()
     loadBinds()
     sampRegisterChatCommand("setbind", setBind)
     sampRegisterChatCommand("clearbinds", clearBinds)
     sampRegisterChatCommand("savebinds", saveBinds)
     sampRegisterChatCommand("showbinds", showBinds)
     sampRegisterChatCommand("loadbinds", loadBinds)
+    sampRegisterChatCommand("removebind", removeBind)
+    sampRegisterChatCommand("kbhelp", showCommands)
     while true do
         wait(0)
         result = not (sampIsChatInputActive() or sampIsDialogActive() or sampIsCursorActive())
@@ -43,6 +44,17 @@ function main()
     end
 end
 
+function showCommands()
+    sampAddChatMessage("CMD: {0099FF}/setbind [cmd] [key=a-z/0-9] - {DDDDDD}Sets a bind.", 0xDDDDDD)
+    sampAddChatMessage("CMD: {0099FF}/removebind {command} or /removebind {index} - {DDDDDD}Removes a specific bind.", 0xDDDDDD)
+    sampAddChatMessage("CMD: {0099FF}/clearbinds - {DDDDDD}clears all your binds.", 0xDDDDDD)
+    sampAddChatMessage("CMD: {0099FF}/showbinds - {DDDDDD}Shows all binds.", 0xDDDDDD)
+    sampAddChatMessage("CMD: {0099FF}/savebinds - {DDDDDD}Saves all your binds.", 0xDDDDDD)
+    sampAddChatMessage("CMD: {0099FF}/loadbinds - {DDDDDD}Reloads a saved bind.", 0xDDDDDD)
+    sampAddChatMessage("CMD: {0099FF}/kbhelp - {DDDDDD}Shows keybinder commands.", 0xDDDDDD)
+
+end
+
 function setBind(str)
     if #str < 1 then
         sampAddChatMessage("ERROR: Please use a single letter between {00FF00}A-Z or 0-9.", 0xDD3322)
@@ -60,9 +72,28 @@ function setBind(str)
     addKeybind(cmd, binder)
 end
 
--- function removeBind(index){
-
--- }
+function removeBind(index_string)
+    if binds[index_string] ~= nil then 
+        binds[index_string] = nil
+        totalbinds = totalbinds - 1
+    else
+        index = tonumber(index_string)
+        if (index == nil or index > totalbinds) then
+            sampAddChatMessage("ERROR: Incorrect Index or command.", 0xDD3322)
+            sampAddChatMessage("TIP: Use /showbinds to find the index or command", 0xAAAAAA)
+            sampAddChatMessage("Example: /removebind /ec or /removebind 1", 0x0099EE)
+        else
+            local tempCounter = 1
+            for key, bind in pairs(binds) do
+                if tempCounter == index then 
+                    binds[key] = nil
+                    totalbinds = totalbinds - 1
+                end
+                tempCounter = tempCounter + 1
+            end 
+        end
+    end
+end
 
 function addKeybind(cmd, binder)
 
@@ -83,13 +114,13 @@ function addKeybind(cmd, binder)
         totalbinds = totalbinds + 1
     end
     binds[cmd] = {tonumber(keyCode), false}
-    sampAddChatMessage("Keybinder : CMD {0066AA}".. cmd .. "{FFFFFF} to key {0066AA}" .. binder .. "{FFFFFF}. Keycode: {0066AA}" .. keyCode, 0xFFFFFF)
+    sampAddChatMessage("CMD: {0099FF}".. cmd .. "{FFFFFF} to key {0099FF}" .. binder .. "{FFFFFF}. Keycode: {0099FF}" .. keyCode, 0xFFFFFF)
 
 end
 
 function clearBinds()
     binds = {}
-    sampAddChatMessage("{FFFFFF}Keybinder : {00FF00}Binds cleared!", 0x00FF00)
+    sampAddChatMessage("{0099FF}INFO: {FFFFFF}Binds cleared!")
 end
 
 function saveBinds()
@@ -102,7 +133,7 @@ function saveBinds()
         file:write(key .. ":" .. bind[1] .. "\n")
     end
     file:close()
-    sampAddChatMessage("{FFFFFF}Keybinder : {00FF00}Binds saved!", 0x00FF00)
+    sampAddChatMessage("{0099FF}INFO: {FFFFFF}Binds saved!")
 end
 
 function loadBinds()
@@ -112,6 +143,7 @@ function loadBinds()
         return
     end
     local addBind = file:read("*line")
+    totalbinds = 0
     while not(addBind==nil) do
         local breakIndex = string.find(addBind, ":")
         local key = string.sub(addBind, 1, breakIndex - 1)
@@ -120,18 +152,18 @@ function loadBinds()
         totalbinds = totalbinds + 1
         addBind = file:read("*line")
     end
-    sampAddChatMessage("Loaded your last saved ".. totalbinds .." keybinds!", 0x003377)
+    sampAddChatMessage("INFO: Loaded {0099FF}".. totalbinds .."{DDDDDD} saved keybinds!", 0xDDDDDD)
     file:close()
 end
 
 function showBinds()
-    sampAddChatMessage("Command  :  Keybind", 0xFFFFFF)
     local counter = 0;
+    sampAddChatMessage("Index. Command : Key Code", 0x0099FF)
+
     for key, bind in pairs(binds) do
-        sampAddChatMessage(counter+1 .. ". " .. key .. "  :  " .. bind[1], 0x0066AA)
+        sampAddChatMessage("{FFFFFF}" ..counter+1 .. ". {DDDDDD}" .. key .. "  :  " .. bind[1], 0x0066AA)
         counter = counter + 1
     end
-    sampAddChatMessage("You have " .. totalbinds .. " binds.", 0x0055FF)
 
 end
 
