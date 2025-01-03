@@ -10,6 +10,6 @@ Commands:
 2) /clearbinds
 3) /loadbinds
 4) /savebinds
-
+5) /removebind <command> or /removebind <index in /showbinds>
 Installation:
 Simply drop the file in the moonloader folder.
