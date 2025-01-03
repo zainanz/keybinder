@@ -1,4 +1,5 @@
 function main()
+    totalbinds = 0
     binds = {}
     characterASCIICODE = {
         [0] = 48,
@@ -58,8 +59,14 @@ function setBind(str)
     end
     addKeybind(cmd, binder)
 end
-    
+
+-- function removeBind(index){
+
+-- }
+
 function addKeybind(cmd, binder)
+
+    -- Setting KeyCode > Checking if its a string or a number.
     if tonumber(binder) == nil then -- its a string
         -- do this
         keyCode = characterASCIICODE[string.lower(binder)]
@@ -72,14 +79,10 @@ function addKeybind(cmd, binder)
 
         keyCode = characterASCIICODE[tonumber(binder)]
     end
-    for key, bind in pairs(binds) do
-        if bind == keyCode then
-            binds[key] = nil
-            break
-        end
+    if binds[cmd] == nil then
+        totalbinds = totalbinds + 1
     end
     binds[cmd] = {tonumber(keyCode), false}
-
     sampAddChatMessage("Keybinder : CMD {0066AA}".. cmd .. "{FFFFFF} to key {0066AA}" .. binder .. "{FFFFFF}. Keycode: {0066AA}" .. keyCode, 0xFFFFFF)
 
 end
@@ -114,15 +117,22 @@ function loadBinds()
         local key = string.sub(addBind, 1, breakIndex - 1)
         local bind = string.sub(addBind, breakIndex + 1)
         binds[key] = {tonumber(bind), false}
+        totalbinds = totalbinds + 1
         addBind = file:read("*line")
     end
-    sampAddChatMessage("Loaded your last saved keybinds!", 0x003377)
+    sampAddChatMessage("Loaded your last saved ".. totalbinds .." keybinds!", 0x003377)
     file:close()
 end
 
 function showBinds()
     sampAddChatMessage("Command  :  Keybind", 0xFFFFFF)
+    local counter = 0;
     for key, bind in pairs(binds) do
-        sampAddChatMessage(key .. "  :  " .. bind[1], 0x0066AA)
+        sampAddChatMessage(counter+1 .. ". " .. key .. "  :  " .. bind[1], 0x0066AA)
+        counter = counter + 1
     end
+    sampAddChatMessage("You have " .. totalbinds .. " binds.", 0x0055FF)
+
 end
+
+
