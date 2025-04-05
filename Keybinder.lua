@@ -32,7 +32,7 @@ function main()
                 if isKeyDown(bind[1]) then
                     if not bind[2] then
                         bind[2] = true
-                        sampSendChat(string.format(key))
+                        sampProcessChatInput(string.format(key))
                     end
                 end
                 if wasKeyReleased(bind[1]) then
@@ -55,18 +55,41 @@ function showCommands()
 
 end
 
+function displayError()
+        sampAddChatMessage("ERROR: Please use a single letter between {00FF00}A-Z or 0-9.", 0xDD3322)
+        sampAddChatMessage("CMD: /setbind [cmd] [key=a-z/0-9]", 0xAAAAAA)
+end
+
 function setBind(str)
+    --Checks size of the str - if incorrect throws err
     if #str < 1 then
-        sampAddChatMessage("ERROR: Please use a single letter between {00FF00}A-Z or 0-9.", 0xDD3322)
-        sampAddChatMessage("CMD: /setbind [cmd] [key=a-z/0-9]", 0xAAAAAA)
-        return
+        displayError();
+	return
     end
-    beginIndex = string.find(str, " ")
+	-- Testing if " exists to know if its a params cmd or just a normal one.
+    beginIndex = string.find(str, '"')
+    hasParams = true
+	-- if " doesnt exists - its a normal cmd.
+    if beginIndex == nil then
+	hasParams = false
+    	beginIndex = string.find(str, " ")
+    else
+	-- Otherwise, we skip the the " of string and include only from the sceond char until the end 
+	str = string.sub(str, 2)
+	-- After we skip the first ", locating the next " which marks the end of the cmd
+	beginIndex = string.find(str, '"')
+    end
+	-- extract the cmd into cmd var. -1 is to ensure i dont include "
     cmd = string.sub(str, 1, beginIndex-1)
-    binder = string.sub(str, beginIndex+1)
+    if hasParams then
+	-- If it has params, it makes a copy after /setbind "/w hi" x - 2 ensures that we skip hi" - '"' and ' ' and only capture the command
+    	binder = string.sub(str, beginIndex+2)
+    else
+	-- we simply just skip the space.
+    	binder = string.sub(str, beginIndex+1)
+    end
     if (#binder ~= 1) or (#cmd < 1) then
-        sampAddChatMessage("ERROR: Please use a single letter between {00FF00}A-Z or 0-9.", 0xDD3322)
-        sampAddChatMessage("CMD: /setbind [cmd] [key=a-z/0-9]", 0xAAAAAA)
+	displayError();
         return
     end
     addKeybind(cmd, binder)
@@ -166,5 +189,4 @@ function showBinds()
     end
 
 end
-
 
